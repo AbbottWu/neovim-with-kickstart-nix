@@ -7,7 +7,7 @@ local cmp = require('cmp')
 local lspkind = require('lspkind')
 local luasnip = require('luasnip')
 
-vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
+vim.opt.completeopt = { 'menuone', 'noselect', 'preview' }
 
 local function has_words_before()
   local unpack_ = unpack or table.unpack
@@ -26,7 +26,7 @@ end
 
 cmp.setup {
   completion = {
-    completeopt = 'menu,menuone,noinsert',
+    completeopt = 'menuone,noselect,preview',
     -- autocomplete = false,
   },
   formatting = {
@@ -53,6 +53,26 @@ cmp.setup {
     end,
   },
   mapping = {
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_locally_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+
+
     ['<C-b>'] = cmp.mapping(function(_)
       if cmp.visible() then
         cmp.scroll_docs(-4)
@@ -67,7 +87,7 @@ cmp.setup {
         complete_with_source('path')
       end
     end, { 'i', 'c', 's' }),
-    ['<C-n>'] = cmp.mapping(function(fallback)
+    ['<C-j>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
       -- expand_or_jumpable(): Jump outside the snippet region
@@ -80,7 +100,7 @@ cmp.setup {
         fallback()
       end
     end, { 'i', 'c', 's' }),
-    ['<C-p>'] = cmp.mapping(function(fallback)
+    ['<C-k>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
       elseif luasnip.jumpable(-1) then
