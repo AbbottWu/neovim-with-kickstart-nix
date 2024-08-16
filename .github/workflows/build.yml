@@ -1,0 +1,31 @@
+name: "Build and populate cache"
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - CI-dev
+  schedule:
+    # rebuild everyday at 2:51
+    # TIP: Choose a random time here so not all repositories are build at once:
+    # https://www.random.org/clock-times/?num=1&earliest=01%3A00&latest=08%3A00&interval=5&format=html&rnd=new
+    - cron:  '45 5 * * *'
+jobs:
+  tests:
+    strategy:
+      matrix:
+        nixPath:
+          - nixpkgs=channel:nixos-unstable
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install nix
+      uses: DeterminateSystems/nix-installer-action@main
+    - name: Magic Nix cache
+      uses: DeterminateSystems/magic-nix-cache-action@main
+    - name: Show nixpkgs version
+      run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
+    - name: Build nix packages
+      run: nix build nvim
